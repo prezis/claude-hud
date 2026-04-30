@@ -106,7 +106,7 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
       ? await deps.getClaudeCodeVersion()
       : undefined;
     const effortInfo = config.display.showEffortLevel
-      ? resolveEffortLevel(stdin.effort)
+      ? resolveEffortLevel(stdin.effort, stdin.cwd)
       : null;
     const memoryUsage =
       config.display.showMemoryUsage && config.lineLayout === "expanded"

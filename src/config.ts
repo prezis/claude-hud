@@ -158,7 +158,10 @@ export const DEFAULT_CONFIG: HudConfig = {
     showTodos: false,
     showSessionName: false,
     showClaudeCodeVersion: false,
-    showEffortLevel: false,
+    // prezis fork: default ON. The settings.json fallback resolver in
+    // src/effort.ts means this segment is useful out-of-the-box even on
+    // Claude Code < 2.1.115 (no stdin.effort field) — see README §Effort.
+    showEffortLevel: true,
     showMemoryUsage: false,
     showPromptCache: false,
     promptCacheTtlSeconds: 300,

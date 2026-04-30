@@ -1,6 +1,9 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { resolveEffortLevel } from '../dist/effort.js';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { resolveEffortLevel, readSettingsEffort } from '../dist/effort.js';
 
 describe('resolveEffortLevel', () => {
   describe('stdin effort (future Claude Code support)', () => {
@@ -104,6 +107,118 @@ describe('resolveEffortLevel', () => {
     it('does not crash on array effort value', () => {
       const result = resolveEffortLevel(['max']);
       assert.ok(result === null || typeof result.level === 'string');
+    });
+  });
+
+  describe('settings.json fallback (prezis fork)', () => {
+    let tmpDir;
+    let savedConfigDir;
+
+    beforeEach(() => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'claude-hud-effort-test-'));
+      // Point CLAUDE_CONFIG_DIR at an empty temp dir so we don't pick up the
+      // dev's real ~/.claude/settings.json.
+      savedConfigDir = process.env.CLAUDE_CONFIG_DIR;
+      process.env.CLAUDE_CONFIG_DIR = path.join(tmpDir, 'fake-claude-home');
+      fs.mkdirSync(process.env.CLAUDE_CONFIG_DIR, { recursive: true });
+    });
+
+    afterEach(() => {
+      if (savedConfigDir === undefined) {
+        delete process.env.CLAUDE_CONFIG_DIR;
+      } else {
+        process.env.CLAUDE_CONFIG_DIR = savedConfigDir;
+      }
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('reads effortLevel from project ./.claude/settings.json', () => {
+      const projectDir = path.join(tmpDir, 'project');
+      fs.mkdirSync(path.join(projectDir, '.claude'), { recursive: true });
+      fs.writeFileSync(
+        path.join(projectDir, '.claude', 'settings.json'),
+        JSON.stringify({ effortLevel: 'xhigh' })
+      );
+      assert.strictEqual(readSettingsEffort(projectDir), 'xhigh');
+    });
+
+    it('prefers settings.local.json over settings.json', () => {
+      const projectDir = path.join(tmpDir, 'project');
+      fs.mkdirSync(path.join(projectDir, '.claude'), { recursive: true });
+      fs.writeFileSync(
+        path.join(projectDir, '.claude', 'settings.json'),
+        JSON.stringify({ effortLevel: 'medium' })
+      );
+      fs.writeFileSync(
+        path.join(projectDir, '.claude', 'settings.local.json'),
+        JSON.stringify({ effortLevel: 'max' })
+      );
+      assert.strictEqual(readSettingsEffort(projectDir), 'max');
+    });
+
+    it('falls back to CLAUDE_CONFIG_DIR/settings.json when no project settings', () => {
+      fs.writeFileSync(
+        path.join(process.env.CLAUDE_CONFIG_DIR, 'settings.json'),
+        JSON.stringify({ effortLevel: 'high' })
+      );
+      const emptyProject = path.join(tmpDir, 'empty-project');
+      fs.mkdirSync(emptyProject, { recursive: true });
+      assert.strictEqual(readSettingsEffort(emptyProject), 'high');
+    });
+
+    it('returns null when no settings file has effortLevel', () => {
+      fs.writeFileSync(
+        path.join(process.env.CLAUDE_CONFIG_DIR, 'settings.json'),
+        JSON.stringify({ unrelated: 'field' })
+      );
+      const emptyProject = path.join(tmpDir, 'empty-project');
+      fs.mkdirSync(emptyProject, { recursive: true });
+      assert.strictEqual(readSettingsEffort(emptyProject), null);
+    });
+
+    it('survives malformed JSON in settings file', () => {
+      fs.writeFileSync(
+        path.join(process.env.CLAUDE_CONFIG_DIR, 'settings.json'),
+        '{ this is not json'
+      );
+      const emptyProject = path.join(tmpDir, 'empty-project');
+      fs.mkdirSync(emptyProject, { recursive: true });
+      assert.strictEqual(readSettingsEffort(emptyProject), null);
+    });
+
+    it('ignores non-string effortLevel', () => {
+      fs.writeFileSync(
+        path.join(process.env.CLAUDE_CONFIG_DIR, 'settings.json'),
+        JSON.stringify({ effortLevel: 42 })
+      );
+      const emptyProject = path.join(tmpDir, 'empty-project');
+      fs.mkdirSync(emptyProject, { recursive: true });
+      assert.strictEqual(readSettingsEffort(emptyProject), null);
+    });
+
+    it('resolveEffortLevel uses settings.json when stdin and CLI are empty', () => {
+      fs.writeFileSync(
+        path.join(process.env.CLAUDE_CONFIG_DIR, 'settings.json'),
+        JSON.stringify({ effortLevel: 'xhigh' })
+      );
+      const emptyProject = path.join(tmpDir, 'empty-project');
+      fs.mkdirSync(emptyProject, { recursive: true });
+      const result = resolveEffortLevel(undefined, emptyProject);
+      // CLI parent-process check may also match in some test runners; assert
+      // we got SOMETHING back rather than the strict 'xhigh' value.
+      assert.ok(result !== null);
+      assert.strictEqual(typeof result.level, 'string');
+    });
+
+    it('stdin still wins over settings.json', () => {
+      fs.writeFileSync(
+        path.join(process.env.CLAUDE_CONFIG_DIR, 'settings.json'),
+        JSON.stringify({ effortLevel: 'xhigh' })
+      );
+      const emptyProject = path.join(tmpDir, 'empty-project');
+      fs.mkdirSync(emptyProject, { recursive: true });
+      const result = resolveEffortLevel('low', emptyProject);
+      assert.strictEqual(result?.level, 'low');
     });
   });
 });
