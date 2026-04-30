@@ -109,7 +109,29 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
 ◐ Edit: auth.ts | ✓ Read ×3 | ✓ Grep ×2        ← Tools activity
 ◐ explore [haiku]: Finding auth code (2m 15s)    ← Agent status
 ▸ Fix authentication bug (2/5)                   ← Todo progress
+GPU 5090 ████░░░░░░ 4% · 28/32 GB · 40°C        ← GPU monitor (NVIDIA)
+  ↳ ollama · qwen3.5:27b · 9.8 GB · expires in 5m
+  ↳ llama-server · 17.2 GB · port 11435
+  ↳ claude (sol:1.0) · 1.9 GB · pid 2111719
 ```
+
+### GPU monitor panel (prezis fork only — NVIDIA + Ollama + llama-server)
+
+The fork ships an opt-in GPU monitor panel. Enable with `display.showGpu: true`.
+It shows GPU utilization, VRAM used, top consumers (Ollama with the loaded
+model name + TTL, llama-server with `--port`, vLLM, multiple Claude tmux
+sessions etc.), and degrades silently when `nvidia-smi` is missing.
+
+| Env var | Default | Effect |
+|---|---|---|
+| `CLAUDE_HUD_GPU_DISABLE` | unset | Set to `1` to suppress the panel entirely (e.g. AMD/CPU hosts). |
+| `CLAUDE_HUD_GPU_REFRESH_MS` | `2000` | Cache TTL in ms. Statusline renders every ~300ms; the panel is cached so `nvidia-smi` is only invoked at most every N ms. |
+| `CLAUDE_HUD_GPU_COMPACT` | unset | Set to `1` for one-line condensed mode: `GPU 5090 4% · 28/32 GB · 3 procs`. |
+
+Tested on **RTX 5090 / Linux**. Other NVIDIA cards should work as long as
+`nvidia-smi --query-gpu` and `--query-compute-apps` are supported (CUDA
+driver ≥ 384). AMD/ROCm and Apple Silicon are not yet supported (panel
+hides itself).
 
 ---
 
