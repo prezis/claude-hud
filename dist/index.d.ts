@@ -9,6 +9,7 @@ import { getClaudeCodeVersion } from "./version.js";
 import { getMemoryUsage } from "./memory.js";
 import { applyContextWindowFallback } from "./context-cache.js";
 import { getUsageFromExternalSnapshot } from "./external-usage.js";
+import { getGpuStatus } from "./gpu.js";
 export { getUsageFromExternalSnapshot } from "./external-usage.js";
 export type MainDeps = {
     readStdin: typeof readStdin;
@@ -23,6 +24,7 @@ export type MainDeps = {
     getClaudeCodeVersion: typeof getClaudeCodeVersion;
     getMemoryUsage: typeof getMemoryUsage;
     applyContextWindowFallback: typeof applyContextWindowFallback;
+    getGpuStatus: typeof getGpuStatus;
     render: typeof render;
     now: () => number;
     log: (...args: unknown[]) => void;

@@ -8,6 +8,7 @@ export const DEFAULT_ELEMENT_ORDER = [
     'usage',
     'promptCache',
     'memory',
+    'gpu',
     'environment',
     'tools',
     'agents',
@@ -57,6 +58,9 @@ export const DEFAULT_CONFIG = {
         // Claude Code < 2.1.115 (no stdin.effort field) — see README §Effort.
         showEffortLevel: true,
         showMemoryUsage: false,
+        // prezis fork: GPU panel is opt-in. nvidia-smi must be on $PATH on the
+        // host. Set CLAUDE_HUD_GPU_DISABLE=1 to suppress entirely (e.g. AMD/CPU).
+        showGpu: false,
         showPromptCache: false,
         promptCacheTtlSeconds: 300,
         showSessionTokens: false,
@@ -353,6 +357,9 @@ export function mergeConfig(userConfig) {
         showMemoryUsage: typeof migrated.display?.showMemoryUsage === 'boolean'
             ? migrated.display.showMemoryUsage
             : DEFAULT_CONFIG.display.showMemoryUsage,
+        showGpu: typeof migrated.display?.showGpu === 'boolean'
+            ? migrated.display.showGpu
+            : DEFAULT_CONFIG.display.showGpu,
         showPromptCache: typeof migrated.display?.showPromptCache === 'boolean'
             ? migrated.display.showPromptCache
             : DEFAULT_CONFIG.display.showPromptCache,

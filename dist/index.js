@@ -11,6 +11,7 @@ import { resolveEffortLevel } from "./effort.js";
 import { applyContextWindowFallback } from "./context-cache.js";
 import { getUsageFromExternalSnapshot } from "./external-usage.js";
 import { setLanguage, t } from "./i18n/index.js";
+import { getGpuStatus } from "./gpu.js";
 export { getUsageFromExternalSnapshot } from "./external-usage.js";
 import { fileURLToPath } from "node:url";
 import { realpathSync } from "node:fs";
@@ -28,6 +29,7 @@ export async function main(overrides = {}) {
         getClaudeCodeVersion,
         getMemoryUsage,
         applyContextWindowFallback,
+        getGpuStatus,
         render,
         now: () => Date.now(),
         log: console.log,
@@ -77,6 +79,9 @@ export async function main(overrides = {}) {
         const memoryUsage = config.display.showMemoryUsage && config.lineLayout === "expanded"
             ? await deps.getMemoryUsage()
             : null;
+        const gpuStatus = config.display.showGpu
+            ? await deps.getGpuStatus()
+            : null;
         const ctx = {
             stdin,
             transcript,
@@ -94,6 +99,7 @@ export async function main(overrides = {}) {
             claudeCodeVersion,
             effortLevel: effortInfo?.level,
             effortSymbol: effortInfo?.symbol,
+            gpuStatus,
         };
         deps.render(ctx);
     }
