@@ -19,7 +19,7 @@ export type GitBranchOverflowMode = 'truncate' | 'wrap';
  */
 export type ModelFormatMode = 'full' | 'compact' | 'short';
 export type TimeFormatMode = 'relative' | 'absolute' | 'both';
-export type HudElement = 'project' | 'context' | 'usage' | 'promptCache' | 'memory' | 'environment' | 'tools' | 'agents' | 'todos';
+export type HudElement = 'project' | 'context' | 'usage' | 'promptCache' | 'memory' | 'gpu' | 'environment' | 'tools' | 'agents' | 'todos';
 export type HudColorName =
   | 'dim'
   | 'red'
@@ -53,6 +53,7 @@ export const DEFAULT_ELEMENT_ORDER: HudElement[] = [
   'usage',
   'promptCache',
   'memory',
+  'gpu',
   'environment',
   'tools',
   'agents',
@@ -102,6 +103,7 @@ export interface HudConfig {
     showClaudeCodeVersion: boolean;
     showEffortLevel: boolean;
     showMemoryUsage: boolean;
+    showGpu: boolean;
     showPromptCache: boolean;
     promptCacheTtlSeconds: number;
     showSessionTokens: boolean;
@@ -163,6 +165,9 @@ export const DEFAULT_CONFIG: HudConfig = {
     // Claude Code < 2.1.115 (no stdin.effort field) — see README §Effort.
     showEffortLevel: true,
     showMemoryUsage: false,
+    // prezis fork: GPU panel is opt-in. nvidia-smi must be on $PATH on the
+    // host. Set CLAUDE_HUD_GPU_DISABLE=1 to suppress entirely (e.g. AMD/CPU).
+    showGpu: false,
     showPromptCache: false,
     promptCacheTtlSeconds: 300,
     showSessionTokens: false,
@@ -498,6 +503,9 @@ export function mergeConfig(userConfig: Partial<HudConfig>): HudConfig {
     showMemoryUsage: typeof migrated.display?.showMemoryUsage === 'boolean'
       ? migrated.display.showMemoryUsage
       : DEFAULT_CONFIG.display.showMemoryUsage,
+    showGpu: typeof migrated.display?.showGpu === 'boolean'
+      ? migrated.display.showGpu
+      : DEFAULT_CONFIG.display.showGpu,
     showPromptCache: typeof migrated.display?.showPromptCache === 'boolean'
       ? migrated.display.showPromptCache
       : DEFAULT_CONFIG.display.showPromptCache,

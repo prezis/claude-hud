@@ -13,6 +13,7 @@ import {
   renderPromptCacheLine,
   renderUsageLine,
   renderMemoryLine,
+  renderGpuLine,
   renderSessionTokensLine,
 } from './lines/index.js';
 import { dim, RESET } from './colors.js';
@@ -364,6 +365,8 @@ function renderElementLine(
       return renderPromptCacheLine(ctx);
     case 'memory':
       return renderMemoryLine(ctx);
+    case 'gpu':
+      return renderGpuLine(ctx, ctx.gpuStatus ?? null);
     case 'environment':
       return renderEnvironmentLine(ctx);
     case 'tools':
