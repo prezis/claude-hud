@@ -11,6 +11,7 @@ import { resolveEffortLevel } from "./effort.js";
 import { applyContextWindowFallback } from "./context-cache.js";
 import { getUsageFromExternalSnapshot } from "./external-usage.js";
 import { setLanguage, t } from "./i18n/index.js";
+import { getGpuStatus } from "./gpu.js";
 import type { RenderContext } from "./types.js";
 
 export { getUsageFromExternalSnapshot } from "./external-usage.js";
@@ -30,6 +31,7 @@ export type MainDeps = {
   getClaudeCodeVersion: typeof getClaudeCodeVersion;
   getMemoryUsage: typeof getMemoryUsage;
   applyContextWindowFallback: typeof applyContextWindowFallback;
+  getGpuStatus: typeof getGpuStatus;
   render: typeof render;
   now: () => number;
   log: (...args: unknown[]) => void;
@@ -49,6 +51,7 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
     getClaudeCodeVersion,
     getMemoryUsage,
     applyContextWindowFallback,
+    getGpuStatus,
     render,
     now: () => Date.now(),
     log: console.log,
@@ -113,6 +116,10 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
         ? await deps.getMemoryUsage()
         : null;
 
+    const gpuStatus = config.display.showGpu
+      ? await deps.getGpuStatus()
+      : null;
+
     const ctx: RenderContext = {
       stdin,
       transcript,
@@ -130,6 +137,7 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
       claudeCodeVersion,
       effortLevel: effortInfo?.level,
       effortSymbol: effortInfo?.symbol,
+      gpuStatus,
     };
 
     deps.render(ctx);

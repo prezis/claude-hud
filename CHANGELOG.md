@@ -6,6 +6,22 @@ All notable changes to Claude HUD will be documented in this file.
 
 ### Fork-only changes (prezis fork)
 
+- **GPU monitor panel** (`src/gpu.ts`, `src/render/lines/gpu.ts`). Opt-in
+  panel (`display.showGpu: true`) showing NVIDIA GPU utilization + VRAM,
+  per-process consumers (Ollama with loaded model + TTL, llama-server with
+  `--port`, vLLM, Claude tmux sessions), and a "Claude sessions: CPU only"
+  fallback line so users always know the answer to "is any Claude session
+  using my GPU?" Cached at 2s TTL (configurable via
+  `CLAUDE_HUD_GPU_REFRESH_MS`) so `nvidia-smi` is not invoked on every
+  ~300ms statusline render. Degrades silently when `nvidia-smi`/Ollama/tmux
+  are absent. Set `CLAUDE_HUD_GPU_DISABLE=1` to suppress entirely;
+  `CLAUDE_HUD_GPU_COMPACT=1` for one-line condensed mode. Tested on
+  RTX 5090 / Linux. New element `'gpu'` added to `HudElement` union and
+  default element order. **22 new tests** in `tests/gpu.test.js` covering
+  parsers (nvidia-smi rows with embedded commas, Ollama `/api/ps`, malformed
+  JSON), `classifyConsumer` heuristics, `collectGpuStatus` happy path with
+  mocked deps + bun→claude promotion via /proc, and `formatGpuLines`
+  rendering modes.
 - **Settings.json effort fallback** (`src/effort.ts`). New 4th resolution step in
   `resolveEffortLevel`: when `stdin.effort` is absent (Claude Code < 2.1.115 or
   payload omitted) and no `--effort` CLI flag is in argv, read `effortLevel`

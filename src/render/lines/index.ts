@@ -4,4 +4,5 @@ export { renderEnvironmentLine } from './environment.js';
 export { renderPromptCacheLine, formatPromptCacheCountdown } from './prompt-cache.js';
 export { renderUsageLine } from './usage.js';
 export { renderMemoryLine } from './memory.js';
+export { renderGpuLine, formatGpuLines } from './gpu.js';
 export { renderSessionTokensLine } from './session-tokens.js';

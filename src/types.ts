@@ -1,5 +1,6 @@
 import type { HudConfig } from './config.js';
 import type { GitStatus } from './git.js';
+import type { GpuStatus } from './gpu.js';
 
 export interface StdinData {
   transcript_path?: string;
@@ -136,4 +137,5 @@ export interface RenderContext {
   claudeCodeVersion?: string;
   effortLevel?: string;
   effortSymbol?: string;
+  gpuStatus?: GpuStatus | null;
 }
