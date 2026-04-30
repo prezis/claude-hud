@@ -1,4 +1,16 @@
-# Claude HUD
+# Claude HUD — prezis fork
+
+> **This is a fork of [`jarrodwatts/claude-hud`](https://github.com/jarrodwatts/claude-hud).**
+>
+> **What's different:**
+> 1. **Effort badge (`◕xhigh`) shown by default.** Upstream defaults `display.showEffortLevel` to `false`; this fork ships it `true`.
+> 2. **`settings.json` effort fallback.** Upstream resolves effort from `stdin.effort` (Claude Code 2.1.115+) or the `--effort` CLI flag only. This fork adds a 4th fallback step that reads `effortLevel` from `${cwd}/.claude/settings.local.json` → `${cwd}/.claude/settings.json` → `${CLAUDE_CONFIG_DIR:-~/.claude}/settings.json` (most-specific wins). Useful on **Claude Code < 2.1.115** and for users who set effort persistently in settings rather than via flag.
+> 3. **stdin contract unchanged**, no new permissions, defensive on malformed/missing files. Adds 8 unit tests in `tests/effort.test.js`.
+>
+> Resolution priority (highest → lowest): `stdin.effort` (string or `{level}`) > `--effort` CLI flag > `settings.json effortLevel` > none.
+> See [`src/effort.ts`](src/effort.ts) and [`CHANGELOG.md`](CHANGELOG.md).
+
+---
 
 A Claude Code plugin that shows what's happening — context usage, active tools, running agents, and todo progress. Always visible below your input.
 

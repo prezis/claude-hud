@@ -4,6 +4,23 @@ All notable changes to Claude HUD will be documented in this file.
 
 ## [Unreleased]
 
+### Fork-only changes (prezis fork)
+
+- **Settings.json effort fallback** (`src/effort.ts`). New 4th resolution step in
+  `resolveEffortLevel`: when `stdin.effort` is absent (Claude Code < 2.1.115 or
+  payload omitted) and no `--effort` CLI flag is in argv, read `effortLevel`
+  from settings files in order of specificity:
+  `${cwd}/.claude/settings.local.json` → `${cwd}/.claude/settings.json` →
+  `${CLAUDE_CONFIG_DIR:-~/.claude}/settings.json`. Defensive on missing files,
+  malformed JSON, and non-string values. `resolveEffortLevel` now accepts an
+  optional `cwd` parameter (passed from `stdin.cwd` in `src/index.ts`).
+- **`display.showEffortLevel` default flipped to `true`.** Combined with the
+  settings.json fallback, the effort badge is visible out-of-the-box for the
+  common case of users who set `effortLevel` in `~/.claude/settings.json`.
+- **Tests:** 8 new tests in `tests/effort.test.js` covering the settings fallback
+  (project-local > project > user precedence, malformed JSON, non-string values,
+  stdin still wins over settings).
+
 ## [0.0.12] - 2026-04-04
 
 ### Added
